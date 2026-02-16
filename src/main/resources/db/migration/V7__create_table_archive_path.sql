@@ -1,6 +1,6 @@
-create table arquive_path(
+create table archive_path(
   id bigserial primary key ,
-  arquivePath varchar(255),
+  archive_path varchar(255),
   post_id bigint,
   comment_id bigint,
   constraint fk_post_id foreign key (post_id) references posts(id),
@@ -9,5 +9,5 @@ create table arquive_path(
 
 );
 
-create index idx_arquive_path_post_id on arquive_path(post_id);
-create index idx_arquive_path_comment_id on arquive_path(comment_id);
+create index idx_archive_path_post_id on archive_path(post_id);
+create index idx_archive_path_comment_id on archive_path(comment_id);
