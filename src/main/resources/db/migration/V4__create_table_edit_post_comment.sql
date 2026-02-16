@@ -4,8 +4,9 @@ create table edit_post_comment(
     edited_post bigint,
     edited_comment bigint,
     edited_at timestamp with time zone default CURRENT_TIMESTAMP,
-    old_text varchar(255),
-    old_image varchar(255),
+    old_title varchar(255),
+    old_description varchar(255),
+
     constraint fk_edited_by foreign key (edited_by) references users(id),
     constraint fk_edited_post foreign key (edited_post) references posts(id),
     constraint fk_edited_comment foreign key (edited_comment) references comments(id),

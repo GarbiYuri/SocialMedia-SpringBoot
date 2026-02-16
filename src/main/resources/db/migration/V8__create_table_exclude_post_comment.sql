@@ -3,6 +3,7 @@ create table exclude_post_comment(
     excluded_by bigint not null,
     excluded_post bigint,
     excluded_comment bigint,
+    exclude_reason varchar(255),
     excluded_at timestamp with time zone default CURRENT_TIMESTAMP,
     constraint fk_user_id foreign key (excluded_by) references users(id),
     constraint fk_post_id foreign key (excluded_post) references posts(id),

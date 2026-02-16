@@ -1,13 +1,13 @@
-create type reaction_post as enum ('LIKE', 'LOVE', 'HAHA', 'HATE');
+create type reaction_post as enum ('LIKE', 'LOVE', 'FUNNY', 'HATE');
 create type reaction_comment as enum('LIKE');
 
 create table reactions(
     id bigserial primary key,
     reaction_post reaction_post,
     reaction_comment reaction_comment,
-    reacted_by bigint not null ,
+    reacted_by bigint not null,
     reacted_at timestamp with time zone default CURRENT_TIMESTAMP,
-    id_post bigint,
+    id_post bigint ,
     id_comment bigint,
     constraint fk_react_by foreign key (reacted_by) references users(id),
     constraint fk_id_post foreign key (id_post) references posts(id),
@@ -17,3 +17,13 @@ create table reactions(
 create index idx_reactions_id_user on reactions(reacted_by);
 create index idx_reactions_id_post on reactions(id_post);
 create index idx_reactions_id_comment on reactions(id_comment);
+
+
+CREATE UNIQUE INDEX idx_unique_user_post_reaction
+    ON reactions (reacted_by, id_post)
+    WHERE id_post IS NOT NULL;
+
+
+CREATE UNIQUE INDEX idx_unique_user_comment_reaction
+    ON reactions (reacted_by, id_comment)
+    WHERE id_comment IS NOT NULL;

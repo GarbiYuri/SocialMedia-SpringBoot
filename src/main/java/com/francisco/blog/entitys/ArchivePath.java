@@ -11,20 +11,30 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "arquive_path")
-public class ArquivePath {
+@Table(name = "archive_path")
+public class ArchivePath {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "arquive_path")
-    private String arquivePath;
+    @Column(name = "archive_path")
+    private String archivePath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    private Post postId;
+    private Post post;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
-    private Comment commentId;
+    private Comment comment;
+
+    //Olds (para SoftDelete)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "old_post_id")
+    private EditPostComment OldPostId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "old_comment_id")
+    private EditPostComment OLdCommentId;
 }
