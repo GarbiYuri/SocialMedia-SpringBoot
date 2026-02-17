@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExcludeUserRepository extends JpaRepository<ExcludeUser, Long> {
-    
+
 }

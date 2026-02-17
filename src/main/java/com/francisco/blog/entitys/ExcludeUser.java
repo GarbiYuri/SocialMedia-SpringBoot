@@ -21,7 +21,7 @@ public class ExcludeUser {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "excluded_by")
-    private User exluderUser;
+    private User excluderUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "excluded_user")

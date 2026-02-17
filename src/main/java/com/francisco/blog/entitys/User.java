@@ -1,10 +1,7 @@
 package com.francisco.blog.entitys;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.ZonedDateTime;
 
@@ -12,6 +9,7 @@ import java.time.ZonedDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User {
@@ -37,6 +35,9 @@ public class User {
 
     @Column(name = "photo_perfil")
     private String photoPerfil;
+
+    @Column(name = "about")
+    private String about;
 
     @Column(name = "is_Active")
     private boolean isActive = true;
