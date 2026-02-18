@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -40,9 +42,11 @@ public class EditUser {
     @Column(name = "old_password")
     private String oldPassword;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_edit_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "old_role")
-    private UserRole oldRole;
+    @Column( name = "role")
+    private Set<UserRole> oldRole = new LinkedHashSet<>();
 
     @Column(name = "old_about")
     private String oldAbout;

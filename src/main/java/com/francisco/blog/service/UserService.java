@@ -4,6 +4,8 @@ import com.francisco.blog.entitys.EditUser;
 import com.francisco.blog.entitys.ExcludeUser;
 import com.francisco.blog.entitys.User;
 import com.francisco.blog.entitys.UserRole;
+import com.francisco.blog.exception.PermissionDeniedException;
+import com.francisco.blog.exception.ResourceNotFoundException;
 import com.francisco.blog.repository.EditUserRepository;
 import com.francisco.blog.repository.ExcludeUserRepository;
 import com.francisco.blog.repository.UserRepository;
@@ -11,10 +13,13 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.LinkedHashSet;
 import java.util.UUID;
+
 
 
 @AllArgsConstructor
@@ -23,27 +28,32 @@ public class UserService {
     private final UserRepository userRepository;
     private final EditUserRepository editUserRepository;
     private final ExcludeUserRepository excludeUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Page<User> showAll(Pageable pageable){
         return userRepository.findAll(pageable);
     }
 
-    public void saveUser(User user){
-        userRepository.saveAndFlush(user);
+    public User saveUser(User user){
+        user.setIsActive(true);
+        return userRepository.saveAndFlush(user);
     }
 
     @Transactional
-    public void editUserById(Long editorId, Long id, User user){
+    public User editUserById(Long editorId, Long id, User user){
         User userEntity = userRepository.findById(id).orElseThrow(
-                () -> new RuntimeException("Usuario não encontrado")
+                () -> new ResourceNotFoundException("Não Foi Possivel Enontrar o Usuario")
         );
         User userEditor = userRepository.findById(editorId).orElseThrow(
-                () -> new RuntimeException("Usuario não encontrado")
+                () -> new RuntimeException("Não Foi Possivel Enontrar o Usuario A editor")
         );
         EditUser editUser = new EditUser();
         editUser.setEditedUser(userEntity);
         editUser.setEditorUser(userEditor);
         boolean altered = false;
+
+        if (editorId.equals(id) || userEditor.getUserRole().contains(UserRole.ROLE_ADMIN)){
+
 
         if (user.getUsername() != null && !user.getUsername().equals(userEntity.getUsername())){
             editUser.setOldUsername(userEntity.getUsername());
@@ -56,17 +66,16 @@ public class UserService {
             altered = true;
         }
         if (user.getPassword() != null && !user.getPassword().equals(userEntity.getPassword())){
-            editUser.setOldPassword(userEntity.getPassword());
-            userEntity.setPassword(user.getPassword());
-            altered = true;
+            throw new PermissionDeniedException("Não é Permitido Atualizar Senhas Por essa Rota");
         }
-        if (user.getRole() != null && !user.getRole().equals(userEntity.getRole())){
-            if (userEditor.getRole() == UserRole.ADMIN) {
-                editUser.setOldRole(userEntity.getRole());
-                userEntity.setRole(user.getRole());
+        if (user.getUserRole() != null && !user.getUserRole().equals(userEntity.getUserRole())){
+            if (userEditor.getUserRole().contains(UserRole.ROLE_ADMIN)) {
+
+                editUser.setOldRole(new LinkedHashSet<>(userEntity.getUserRole()));
+                userEntity.setUserRole(user.getUserRole());
                 altered = true;
             }else {
-                throw new RuntimeException("Somente Administradores podem alterar Permissão");
+                throw new PermissionDeniedException("Somente Administradores podem alterar Permissão");
             }
         }
         if (user.getPhotoPerfil() != null && !user.getPhotoPerfil().equals(userEntity.getPhotoPerfil())){
@@ -79,11 +88,37 @@ public class UserService {
             userEntity.setAbout(user.getAbout());
             altered = true;
         }
+        }else {
+            throw new PermissionDeniedException("Não é permitido Alterar Usuario Alheio");
+        }
         if (altered == true){
             editUserRepository.saveAndFlush(editUser);
             userRepository.saveAndFlush(userEntity);
         }
+        return user;
 
+    }
+
+    @Transactional
+    public User EditPasswordById(Long editorId, Long editedId, String password){
+            User userEntity = userRepository.findById(editedId).orElseThrow(
+                    () -> new ResourceNotFoundException("Não Foi Possivel Enontrar o Usuario")
+            );
+            User userEditor = userEntity;
+            if (editorId != editedId){
+                userEditor = userRepository.findById(editorId).orElseThrow(
+                        () -> new RuntimeException("Não Foi Possivel Enontrar o Usuario editor")
+                );
+            }
+
+
+            if (editorId.equals(editedId) || userEditor.getUserRole().contains(UserRole.ROLE_ADMIN)){
+                userEntity.setPassword(passwordEncoder.encode(password));
+
+            }else {
+                throw new PermissionDeniedException("Você não tem permissão para mudar essa senha");
+            }
+            return userRepository.saveAndFlush(userEntity);
     }
 
     @Transactional
@@ -110,7 +145,7 @@ public class UserService {
 
 
         }
-        excludedUser.setActive(false);
+        excludedUser.setIsActive(false);
         userRepository.saveAndFlush(excludedUser);
         excludeUserRepository.saveAndFlush(excludeUser);
     }
@@ -124,7 +159,7 @@ public class UserService {
         user.setPassword("Deleted_"+UUID.randomUUID());
         user.setPhotoPerfil(null);
         user.setAbout(null);
-        user.setActive(false);
+        user.setIsActive(false);
 
         userRepository.saveAndFlush(user);
     }

@@ -1,0 +1,92 @@
+package com.francisco.blog.controller;
+
+import com.francisco.blog.config.JWTUserData;
+import com.francisco.blog.config.TokenConfig;
+import com.francisco.blog.dto.request.LoginRequest;
+import com.francisco.blog.dto.request.PasswordRequest;
+import com.francisco.blog.dto.request.RegisterRequest;
+import com.francisco.blog.dto.response.LoginResponse;
+import com.francisco.blog.dto.response.PasswordResponse;
+import com.francisco.blog.dto.response.RegisterResponse;
+import com.francisco.blog.entitys.User;
+import com.francisco.blog.entitys.UserRole;
+import com.francisco.blog.service.UserService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+
+@AllArgsConstructor
+@RestController
+@RequestMapping("/user")
+public class UserController {
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final TokenConfig tokenConfig;
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> RegisterUser(@RequestBody RegisterRequest registerRequest){
+        User user = new User();
+        user.setUsername(registerRequest.username());
+        user.setEmail(registerRequest.email());
+        user.setUserRole(Set.of(UserRole.ROLE_USER));
+
+        user.setPassword(passwordEncoder.encode(registerRequest.password()));
+
+
+
+        userService.saveUser(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponse(user.getUsername(), user.getEmail()));
+    }
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest){
+        UsernamePasswordAuthenticationToken usenameAndPass = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
+        Authentication authentication = authenticationManager.authenticate(usenameAndPass);
+
+        User user = (User) authentication.getPrincipal();
+        String token = tokenConfig.generateToken(user);
+
+        return ResponseEntity.ok(new LoginResponse(token));
+    }
+
+    @PutMapping("/editUser")
+    public ResponseEntity<User> editUser( @RequestBody User user,@RequestParam Long id, Authentication authentication){
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        Long idLogado = userData.userId();
+
+        User updatedUser = userService.editUserById(idLogado, id, user);
+        return ResponseEntity.ok(updatedUser);
+    }
+    @PutMapping("/updatePassword")
+    public ResponseEntity<PasswordResponse> updatePassword(@RequestBody PasswordRequest password){
+        UsernamePasswordAuthenticationToken usernameAndPass = new UsernamePasswordAuthenticationToken(password.email(), password.oldPassword());
+        Authentication authentication = authenticationManager.authenticate(usernameAndPass);
+
+        User user = (User) authentication.getPrincipal();
+
+        String token = tokenConfig.generateToken(user);
+
+        userService.EditPasswordById(user.getId(), user.getId(), password.password());
+        return ResponseEntity.ok(new PasswordResponse(user.getUsername(), user.getEmail(), token));
+    }
+    @PutMapping("/adminUpdatePassword")
+    public ResponseEntity<PasswordResponse> updatePassword(Authentication authentication ,@RequestParam String password, @RequestParam Long id){
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        User user = userService.EditPasswordById(userData.userId(), id, password);
+
+        return ResponseEntity.ok(new PasswordResponse(user.getUsername(), user.getEmail(), null));
+
+    }
+
+}

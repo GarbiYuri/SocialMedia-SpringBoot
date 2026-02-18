@@ -6,7 +6,6 @@ create table edit_user(
     old_username varchar(255) ,
     old_email varchar(255),
     old_password varchar(255) ,
-    old_role user_role,
     old_about varchar(255),
     old_photo_perfil varchar(255),
 
