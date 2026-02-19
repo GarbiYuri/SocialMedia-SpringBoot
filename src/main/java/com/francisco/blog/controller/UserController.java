@@ -2,17 +2,19 @@ package com.francisco.blog.controller;
 
 import com.francisco.blog.config.JWTUserData;
 import com.francisco.blog.config.TokenConfig;
+import com.francisco.blog.dto.request.DeleteUserRequest;
 import com.francisco.blog.dto.request.LoginRequest;
 import com.francisco.blog.dto.request.PasswordRequest;
 import com.francisco.blog.dto.request.RegisterRequest;
-import com.francisco.blog.dto.response.LoginResponse;
-import com.francisco.blog.dto.response.PasswordResponse;
-import com.francisco.blog.dto.response.RegisterResponse;
+import com.francisco.blog.dto.response.*;
 import com.francisco.blog.entitys.User;
 import com.francisco.blog.entitys.UserRole;
 import com.francisco.blog.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +33,13 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenConfig tokenConfig;
+
+    @GetMapping("/show")
+    public Page<ShowUserResponse> showAll(@PageableDefault(size = 10, sort = "username") Pageable pageable, Authentication authentication){
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        return userService.showAll(userData.userId(), pageable);
+    }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> RegisterUser(@RequestBody RegisterRequest registerRequest){
@@ -87,6 +96,33 @@ public class UserController {
 
         return ResponseEntity.ok(new PasswordResponse(user.getUsername(), user.getEmail(), null));
 
+    }
+    @PutMapping("/softDeleteUser")
+    public ResponseEntity<DeleteUserResponse> softDeleteUser(@RequestBody DeleteUserRequest deleteUserRequest){
+        UsernamePasswordAuthenticationToken  userAndPass = new UsernamePasswordAuthenticationToken(deleteUserRequest.email(), deleteUserRequest.password());
+        Authentication authentication = authenticationManager.authenticate(userAndPass);
+
+        User user = (User) authentication.getPrincipal();
+
+        DeleteUserResponse userDeleted = userService.SoftDeleteUserById(user.getId(), user.getId(), deleteUserRequest.reason(), deleteUserRequest.time());
+
+        return ResponseEntity.ok(new DeleteUserResponse(userDeleted.username(), userDeleted.email(), userDeleted.is_Active(), userDeleted.reason(), userDeleted.time() + " days"));
+
+    }
+    @PutMapping("/softDeleteAdmin")
+    public ResponseEntity<DeleteUserResponse> softDeleteUser(Authentication authentication, @RequestParam Long excludedId, @RequestParam String reason, @RequestParam Integer time){
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        DeleteUserResponse userDeleted = userService.SoftDeleteUserById(userData.userId(), excludedId, reason, time);
+
+        return ResponseEntity.ok(new DeleteUserResponse(userDeleted.username(), userDeleted.email(), userDeleted.is_Active(), userDeleted.reason(), userDeleted.time() + " days"));
+    }
+    @PutMapping("/permDeleteAdmin")
+    public ResponseEntity<Void> permDeleteAdmin(@RequestParam Long id){
+
+        userService.DeletePermUserById(id);
+
+        return ResponseEntity.ok().build();
     }
 
 }

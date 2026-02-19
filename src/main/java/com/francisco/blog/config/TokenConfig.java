@@ -17,14 +17,14 @@ public class TokenConfig {
     @Value("{api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User usuario){
+    public String generateToken(User user){
 
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         return JWT.create()
-                .withClaim("userId", usuario.getId())
-                .withClaim("roles", usuario.getUserRole().stream().map(Enum::name).toList())
-                .withSubject(usuario.getEmail())
+                .withClaim("userId", user.getId())
+                .withClaim("roles", user.getUserRole().stream().map(Enum::name).toList())
+                .withSubject(user.getEmail())
                 .withExpiresAt(Instant.now().plusSeconds(1800))
                 .withIssuedAt(Instant.now())
                 .sign(algorithm);
