@@ -114,7 +114,7 @@ public class UserService {
         }else {
             throw new PermissionDeniedException("Não é permitido Alterar Usuario Alheio");
         }
-        if (altered == true){
+        if (altered){
             editUserRepository.saveAndFlush(editUser);
             userRepository.saveAndFlush(userEntity);
         }

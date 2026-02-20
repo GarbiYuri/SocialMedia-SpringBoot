@@ -7,7 +7,6 @@ import com.francisco.blog.dto.response.PostResponse;
 import com.francisco.blog.entitys.*;
 import com.francisco.blog.exception.PermissionDeniedException;
 import com.francisco.blog.exception.ResourceNotFoundException;
-import com.francisco.blog.repository.ArchivePathRepository;
 import com.francisco.blog.repository.EditPostCommentRepository;
 import com.francisco.blog.repository.ExcludePostCommentRepository;
 import com.francisco.blog.repository.PostRepository;
@@ -17,9 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -28,7 +25,6 @@ public class PostService {
     private final UserService userService;
     private final EditPostCommentRepository editPostCommentRepository;
     private final ExcludePostCommentRepository excludePostCommentRepository;
-    private final ArchivePathRepository archivePathRepository;
 
     public Page<PostResponse> showAll(Pageable pageable, Long idUser, Boolean showDesactive){
         User userEntity = userService.showUserById(idUser);
@@ -121,7 +117,7 @@ public class PostService {
                         archiveNew.setArchivePath(p);
                         archiveNew.setPost(post);
                         return archiveNew;
-                    }).collect(Collectors.toList());
+                    }).toList();
                     post.getArchivePaths().forEach(p ->{
                                 p.setOldPostId(editPostComment);
                                 p.setPost(null);
@@ -145,7 +141,7 @@ public class PostService {
             );
             User user = userService.showUserById(excludorId);
             ExcludePostComment excludePostComment = new ExcludePostComment();
-            if (post.getUser().getId() != excludorId && !user.getUserRole().contains(UserRole.ROLE_ADMIN)){
+            if (post.getUser().getId().equals(excludorId)  && !user.getUserRole().contains(UserRole.ROLE_ADMIN)){
                 throw new PermissionDeniedException("Você não pode excluir o Post de: " + post.getUser().getUsername());
             }
             excludePostComment.setUser(user);
