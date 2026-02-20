@@ -35,10 +35,10 @@ public class UserController {
     private final TokenConfig tokenConfig;
 
     @GetMapping("/show")
-    public Page<ShowUserResponse> showAll(@PageableDefault(size = 10, sort = "username") Pageable pageable, Authentication authentication){
+    public Page<ShowUserResponse> showAll(@PageableDefault(size = 10, sort = "username") Pageable pageable, Authentication authentication,boolean showDesactive){
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
-        return userService.showAll(userData.userId(), pageable);
+        return userService.showAll(userData.userId(), pageable, showDesactive);
     }
 
     @PostMapping("/register")

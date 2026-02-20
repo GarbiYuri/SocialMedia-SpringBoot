@@ -32,9 +32,9 @@ public class ArchivePath {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "old_post_id")
-    private EditPostComment OldPostId;
+    private EditPostComment oldPostId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "old_comment_id")
-    private EditPostComment OLdCommentId;
+    private EditPostComment oLdCommentId;
 }

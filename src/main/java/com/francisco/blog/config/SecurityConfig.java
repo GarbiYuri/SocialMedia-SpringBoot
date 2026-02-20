@@ -44,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/user/softDeleteUser").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/user/softDeleteAdmin").hasRole("ADMIN")
                         .requestMatchers("/user/permDeleteAdmin").hasRole("ADMIN")
+                        .requestMatchers("/post/create").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/post/showAll").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/post/showMyPost").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/post/editMyPost").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/post/deletePost").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

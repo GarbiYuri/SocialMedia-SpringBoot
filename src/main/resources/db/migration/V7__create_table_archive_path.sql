@@ -10,7 +10,10 @@ create table archive_path(
   constraint fk_old_post_id foreign key (old_post_id) references edit_post_comment(id),
   constraint fk_comment_id foreign key (comment_id) references comments(id),
   constraint fk_old_comment_id foreign key (old_comment_id) references edit_post_comment(id),
-  constraint check_origin CHECK ( (post_id is not null and comment_id is null ) or  (post_id is null and comment_id is not null ))
+  constraint check_origin CHECK ( (post_id is not null and comment_id is null and old_post_id is null and old_comment_id is null) or
+                                  (post_id is null and comment_id is not null and old_post_id is null and old_comment_id is null) or
+                                  (post_id is null and comment_id is null and old_post_id is not null and old_comment_id is null) or
+                                  (post_id is null and comment_id is null and old_post_id is null and old_comment_id is not null))
 
 );
 

@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @Setter
@@ -33,6 +37,10 @@ public class Post {
     @Column(nullable = false)
     private  String description;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ArchivePath> archivePaths = new ArrayList<>();
+
+
     @Column(name = "is_active",nullable = false)
-    private boolean isActive = true;
+    private Boolean isActive = true;
 }

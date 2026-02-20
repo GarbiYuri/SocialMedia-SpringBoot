@@ -32,12 +32,12 @@ public class UserService {
     private final ExcludeUserRepository excludeUserRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Page<ShowUserResponse> showAll(Long id,Pageable pageable){
+    public Page<ShowUserResponse> showAll(Long id,Pageable pageable, boolean showDesactive){
 
        User userLogged = userRepository.findById(id).orElseThrow(
                () -> new ResourceNotFoundException("Usuário Logado não encontrado")
        );
-        Page<User> users = userLogged.getUserRole().contains(UserRole.ROLE_ADMIN) ? userRepository.findAll(pageable) :
+        Page<User> users = userLogged.getUserRole().contains(UserRole.ROLE_ADMIN) && showDesactive ? userRepository.findAll(pageable) :
                 userRepository.findAllByIsActiveTrue(pageable);
 
         return users.map(user -> new ShowUserResponse(
@@ -47,6 +47,14 @@ public class UserService {
 
        ));
     }
+
+    public User showUserById(Long id){
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Usuário não encontrado")
+        );
+        return user;
+    }
+
 
 
     public User saveUser(User user){
