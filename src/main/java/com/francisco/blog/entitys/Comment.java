@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.ZonedDateTime;
 
@@ -31,6 +32,7 @@ public class Comment {
     @Column(nullable = false)
     private String comment;
 
+    @CreationTimestamp
     @Column(name = "commented_at", insertable = false)
     private ZonedDateTime commentedAt;
 

@@ -49,6 +49,9 @@ public class SecurityConfig {
                         .requestMatchers("/post/showMyPost").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/post/editMyPost").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/post/deletePost").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/post/hardDeletePost").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/comment/publicComment").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

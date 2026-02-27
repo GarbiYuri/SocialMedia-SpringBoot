@@ -26,6 +26,13 @@ public class PostService {
     private final EditPostCommentRepository editPostCommentRepository;
     private final ExcludePostCommentRepository excludePostCommentRepository;
 
+    public Post showPostById(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new ResourceNotFoundException("Post Não Encontrado")
+        );
+        return post;
+    }
+
     public Page<PostResponse> showAll(Pageable pageable, Long idUser, Boolean showDesactive){
         User userEntity = userService.showUserById(idUser);
         Page<Post> page = userEntity.getUserRole().contains(UserRole.ROLE_ADMIN) && showDesactive ? postRepository.findAll(pageable) :
@@ -46,6 +53,7 @@ public class PostService {
                     );
                 });
     }
+
 
     public Page<MyPostResponse> showMyPosts(Long id, Pageable pageable){
         User user = userService.showUserById(id);
@@ -164,8 +172,21 @@ public class PostService {
                     archives
             );
 
+
         }
 
+        public String hardDeletePostById(Long excludorId, Long id){
+            User user = userService.showUserById(excludorId);
+            Post post = postRepository.findById(id).orElseThrow(
+                    ()-> new ResourceNotFoundException("Post Não encontrado!")
+            );
+           if (user.getUserRole().contains(UserRole.ROLE_ADMIN) || user.getId().equals(post.getUser().getId())){
+               postRepository.deleteById(id);
+           }else{
+               throw new PermissionDeniedException("Sem permissão para excluir Post que não é seu");
+           }
+            return "Deletado Com Sucesso";
+        }
 
 
 
