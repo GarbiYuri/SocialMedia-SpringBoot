@@ -24,7 +24,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/showAll")
-    public ResponseEntity<Page<PostResponse>> showAll(@PageableDefault(size = 10, sort = "title") Pageable pageable, Authentication authentication,@RequestParam(defaultValue = "false") Boolean showDesactive){
+    public ResponseEntity<Page<PostResponse>> showAll(@PageableDefault(size = 10, sort = "title ") Pageable pageable, Authentication authentication,@RequestParam(defaultValue = "false") Boolean showDesactive){
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
         return ResponseEntity.ok(postService.showAll(pageable,  userData.userId(), showDesactive));
     }

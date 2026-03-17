@@ -1,33 +1,45 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
+# --- PASTAS DE BUILD ---
+backend/target/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# --- CONFIGURAÇÕES E SEGURANÇA ---
+backend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+
+# --- MAVEN / WRAPPER ---
+backend/.mvn/
+backend/HELP.md
+backend/target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-.env
+### STS / Eclipse ###
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings/
+backend/.springBeans
+backend/.sts4-cache
+
 ### IntelliJ IDEA ###
-.idea
+.idea/
+backend/.idea/
+frontend/.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
 ### VS Code ###
 .vscode/
+backend/.vscode/
+frontend/.vscode/
+
+### Logs e Lixo do Sistema ###
+*.log
+.DS_Store
+Thumbs.db
