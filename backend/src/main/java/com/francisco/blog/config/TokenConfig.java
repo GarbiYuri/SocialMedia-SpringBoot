@@ -39,7 +39,7 @@ public class TokenConfig {
             return Optional.of(JWTUserData.builder()
                     .userId(decodedJWT.getClaim("userId").asLong())
                     .email(decodedJWT.getSubject())
-                            .roles(decodedJWT.getClaim("roles").asList(String.class))
+                    .roles(decodedJWT.getClaim("roles").asList(String.class))
                     .build());
         }catch (JWTVerificationException e){
             return Optional.empty();

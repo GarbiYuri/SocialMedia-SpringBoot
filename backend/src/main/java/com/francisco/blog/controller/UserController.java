@@ -22,8 +22,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 @AllArgsConstructor
 @RestController
@@ -33,6 +41,16 @@ public class UserController {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenConfig tokenConfig;
+
+    @GetMapping("/me")
+    public ResponseEntity<MyUserResponse> getMyInfo(Authentication authentication){
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+
+        User user = userService.showUserById(userData.userId());
+
+        return ResponseEntity.ok(new MyUserResponse(userData.userId(),user.getEmail(), user.getUsername(),user.getAbout(), user.getPhotoPerfil()));
+    }
+
 
     @GetMapping("/show")
     public Page<ShowUserResponse> showAll(@PageableDefault(size = 10, sort = "username") Pageable pageable, Authentication authentication,boolean showDesactive){
@@ -67,6 +85,25 @@ public class UserController {
         return ResponseEntity.ok(new LoginResponse(token));
     }
 
+    @PostMapping("/uploadPhoto")
+    public ResponseEntity<Map<String, String>> uploadPhoto(@RequestParam("file")MultipartFile file){
+        try {
+            String uploadDir = "/home/francisco/blog/uploads/photos/";
+
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path path = Paths.get(uploadDir, fileName);
+
+
+            Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+            return ResponseEntity.ok(Map.of("url", "/uploads/photos/" + fileName));
+        }catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+
+    }
+
     @PutMapping("/editUser")
     public ResponseEntity<User> editUser( @RequestBody User user,@RequestParam Long id, Authentication authentication){
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
@@ -76,6 +113,7 @@ public class UserController {
         User updatedUser = userService.editUserById(idLogado, id, user);
         return ResponseEntity.ok(updatedUser);
     }
+
     @PutMapping("/updatePassword")
     public ResponseEntity<PasswordResponse> updatePassword(@RequestBody PasswordRequest password){
         UsernamePasswordAuthenticationToken usernameAndPass = new UsernamePasswordAuthenticationToken(password.email(), password.oldPassword());

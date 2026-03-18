@@ -6,6 +6,7 @@ import com.francisco.blog.entitys.EditUser;
 import com.francisco.blog.entitys.ExcludeUser;
 import com.francisco.blog.entitys.User;
 import com.francisco.blog.entitys.UserRole;
+import com.francisco.blog.exception.GlobalExceptionHandler;
 import com.francisco.blog.exception.PermissionDeniedException;
 import com.francisco.blog.exception.ResourceNotFoundException;
 import com.francisco.blog.repository.EditUserRepository;
@@ -84,6 +85,9 @@ public class UserService {
             altered = true;
         }
         if (user.getEmail() != null && !user.getEmail().equals(userEntity.getEmail())){
+            if (userRepository.findUserByEmail(user.getEmail()).isPresent()){
+                throw new PermissionDeniedException("Email Já Tem Vinculo");
+            }
             editUser.setOldEmail(userEntity.getEmail());
             userEntity.setEmail(user.getEmail());
             altered = true;
@@ -101,7 +105,7 @@ public class UserService {
                 throw new PermissionDeniedException("Somente Administradores podem alterar Permissão");
             }
         }
-        if (user.getPhotoPerfil() != null && !user.getPhotoPerfil().equals(userEntity.getPhotoPerfil())){
+        if (user.getPhotoPerfil() != null && !user.getPhotoPerfil().isBlank() && !user.getPhotoPerfil().equals(userEntity.getPhotoPerfil())){
             editUser.setOldPhotoPerfil(userEntity.getPhotoPerfil());
             userEntity.setPhotoPerfil(user.getPhotoPerfil());
             altered = true;

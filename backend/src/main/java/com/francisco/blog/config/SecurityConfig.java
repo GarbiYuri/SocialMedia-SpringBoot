@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/user/show").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/user/editUser").hasAnyRole("USER","ADMIN")
                         .requestMatchers("/user/updatePassword").hasAnyRole("USER","ADMIN")

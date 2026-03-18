@@ -9,6 +9,7 @@ backend/.env
 frontend/.env.local
 frontend/.env.development.local
 frontend/.env.production.local
+uploads/photos/*
 
 # --- MAVEN / WRAPPER ---
 backend/.mvn/
